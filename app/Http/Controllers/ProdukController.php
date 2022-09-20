@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Product;
+use App\Models\Produk;
 
-class ProductController extends Controller
+class ProdukController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +14,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        $data = Produk::all();
+        return view('product.tampil', compact('data'));
     }
 
     /**
@@ -35,11 +36,24 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $product = new Product;
-        $product->nama = request('namaproduk');
-        $product->deskripsi = request('deskripsiproduk');
-        $product->gambar = request()->file('formFile')->store('public/images');
-        $product->save();
+        $this->validate($request, [
+            'nama' => 'required',
+            'deskripsi' => 'required',
+            'gambar' => 'required|image|mimes:jpeg,png,jpg',
+        ]);
+        $file = $request->file('gambar');
+
+        $name_file = time() . "_" . $file->getClientOriginalName();
+        $tujuan_upload = 'produk';
+        $file->move($tujuan_upload, $name_file);
+
+        Produk::create([
+            'nama' => $request->nama,
+            'deskripsi' => $request->deskripsi,
+            'gambar' => $name_file
+        ]);
+
+        return redirect('/produk/detail');
     }
 
     /**
@@ -50,7 +64,7 @@ class ProductController extends Controller
      */
     public function show()
     {
-        return view('product.tampilproduk');
+        //
     }
 
     /**
